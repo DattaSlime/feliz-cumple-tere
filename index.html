@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Cumpleaños Tere</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
+        canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+
+        /* --- PANTALLA INICIAL (Botón Agua Cristalina) --- */
+        #pantalla-inicio {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #001529 0%, #000 100%);
+            z-index: 2000;
+        }
+
+        #btn-juego {
+            padding: 20px 40px; font-size: 1.5rem; cursor: pointer;
+            border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(173, 216, 230, 0.3); 
+            color: #fff; font-weight: bold; position: absolute;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease; text-transform: uppercase;
+        }
+
+        .ripple {
+            position: absolute; border: 3px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%; transform: scale(0); animation: water-spread 0.8s ease-out;
+            pointer-events: none; z-index: 2001;
+        }
+        @keyframes water-spread {
+            to { transform: scale(5); opacity: 0; }
+        }
+
+        /* --- ETIQUETAS 3D --- */
+        .label-3d {
+            position: absolute; color: #fff; font-weight: 800; font-size: 1.2rem;
+            text-transform: uppercase; letter-spacing: 2px; cursor: pointer;
+            text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+            pointer-events: auto; user-select: none; top: 0; left: 0;
+            transform: translate(-50%, -50%); padding: 10px; z-index: 10;
+        }
+
+        /* --- VENTANAS MODALES --- */
+        .overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            width: 80%; max-width: 650px; max-height: 85vh; overflow-y: auto;
+            background: rgba(16, 16, 28, 0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            display: none; flex-direction: column; align-items: center; 
+            padding: 40px; text-align: center; color: white; opacity: 0; z-index: 1000;
+        }
+        .overlay.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        h2 { color: #ff0055; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 3px; }
+        
+        /* --- PUPILETRAS ACTUALIZADO --- */
+        #pupi-container {
+            background: white; padding: 15px; border-radius: 8px; margin: 20px auto;
+        }
+        #pupiletras-grid { 
+            display: grid; grid-template-columns: repeat(12, 30px); 
+            gap: 1px; background: #ccc; border: 2px solid #333;
+        }
+        .letra { 
+            width: 30px; height: 30px; background: white; color: #000;
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; font-family: monospace; font-weight: bold; font-size: 18px;
+        }
+        .letra.active { background: #ff0055; color: white; }
+
+        .btn-accion { margin-top: 20px; padding: 10px 30px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-azul { background: #00d2ff; color: #000; }
+        .btn-regresar { background: transparent; border: 2px solid #ff0055; color: #fff; margin-top: 20px; }
+        .btn-regresar:hover { background: #ff0055; }
+
+        .foto-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+        .foto-box img { width: 140px; height: 140px; object-fit: cover; border-radius: 10px; border: 2px solid #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla-inicio">
+        <button id="btn-juego">Presióname</button>
+    </div>
+
+    <div id="labels-container"></div>
+
+    <div id="ventana-1" class="overlay">
+        <h2>07/01/2006</h2>
+        <div class="foto-container">
+            <div class="foto-box"><p>Pequeña Tere</p><img src="https://via.placeholder.com/150/ff0055/ffffff?text=Bebe" alt="Bebe"></div>
+            <div class="foto-box"><p>Tere Hoy</p><img src="https://via.placeholder.com/150/00d2ff/ffffff?text=Actual" alt="Actual"></div>
+        </div>
+        <p>¡Cómo pasa el tiempo! Un pequeño recuerdo de tu evolución.</p>
+        <button class="btn-accion btn-regresar" onclick="cerrarVentana()">Regresar</button>
+    </div>
+
+    <div id="ventana-2" class="overlay">
+        <h2>Amistad</h2>
+        <p style="color: #00d2ff; font-weight: bold;">Para: Tere <br> De: Erick</p>
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left; margin: 15px 0;">
+            <p>"Hola Tere,</p>
+            <p>En este día especial quería desearte un muy feliz cumpleaños. Aunque los caminos cambian, el aprecio y los buenos deseos permanecen.</p>
+            <p>Espero que pases un día increíble rodeada de tu gente y que este nuevo año te traiga mucha paz y éxitos."</p>
+        </div>
+        <button class="btn-accion btn-regresar" onclick="cerrarVentana()">Regresar</button>
+    </div>
+
+    <div id="ventana-3" class="overlay">
+        <h2>Ojete Ojote</h2>
+        <p style="color: #fff;">Encuentra las palabras ocultas (Cualidades):</p>
+        <div id="pupi-container">
+            <div id="pupiletras-grid"></div>
+        </div>
+        <button class="btn-accion btn-azul" onclick="revisarPupiletra()">Revisar</button>
+        <p id="pupi-res" style="min-height: 40px; margin-top: 15px; color: #ff0055; font-weight: bold;"></p>
+        <button class="btn-accion btn-regresar" onclick="cerrarVentana()">Regresar</button>
+    </div>
+
+    <div id="ventana-4" class="overlay">
+        <h2>Cumplas</h2>
+        <p>Futura Licenciada en Derecho ⚖️</p>
+        <p>Que este año sea clave para tus metas profesionales.</p>
+        <p>Sé que tienes la determinación y la inteligencia para defender lo justo. ¡Mucho éxito en la carrera!</p>
+        <button class="btn-accion btn-regresar" onclick="cerrarVentana()">Regresar</button>
+    </div>
+
+    <script>
+        let scene, camera, renderer, stars, cubes = [], labels = [];
+        let modalAbierto = false, mouseX = 0, mouseY = 0;
+
+        // --- LÓGICA BOTÓN INICIO (GOTA Y RECONSTRUCCIÓN) ---
+        const btn = document.getElementById('btn-juego');
+        const pantallaInicio = document.getElementById('pantalla-inicio');
+        const frases = ["Presióname", "¡Uy! por poco", "Estuvo cerca", "Muy lenta jaja", "Así no podrás entrar", "Hasta un bebé es más rápido", "Agilicemos los dedos", "¡Por pocooo!", "¡Uy! una vez más", "¡Felicidades!"];
+        let clics = 0;
+
+        btn.addEventListener('click', (e) => {
+            clics++;
+            // Efecto Ripple (Agua)
+            const rip = document.createElement('div');
+            rip.className = 'ripple';
+            rip.style.left = e.clientX - 25 + 'px'; rip.style.top = e.clientY - 25 + 'px';
+            document.body.appendChild(rip);
+            setTimeout(() => rip.remove(), 800);
+
+            if (clics < 10) {
+                gsap.to(btn, { opacity: 0, scale: 0.5, duration: 0.2, onComplete: () => {
+                    btn.innerText = frases[clics];
+                    btn.style.left = Math.random() * 75 + 10 + '%';
+                    btn.style.top = Math.random() * 75 + 10 + '%';
+                    gsap.to(btn, { opacity: 1, scale: 1, duration: 0.2 });
+                }});
+            } else {
+                gsap.to(pantallaInicio, { duration: 1, opacity: 0, onComplete: () => {
+                    pantallaInicio.style.display = 'none';
+                    init3D();
+                    generarPupiletra();
+                }});
+            }
+        });
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 7;
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const l1 = new THREE.PointLight(0xff0055, 2, 50); l1.position.set(-5, 2, 5); scene.add(l1);
+            const l2 = new THREE.PointLight(0x00d2ff, 2, 50); l2.position.set(5, -2, 5); scene.add(l2);
+            scene.add(new THREE.AmbientLight(0x404040));
+
+            crearEstrellas();
+            const titulos = ["07/01/2006", "Amistad", "Ojete Ojote", "Cumplas"];
+            const labelsContainer = document.getElementById('labels-container');
+
+            for (let i = 0; i < 4; i++) {
+                const geometry = new THREE.IcosahedronGeometry(1.1, 0);
+                const material = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.x = (i - 1.5) * 3.5; 
+                cube.userData = { id: i + 1 };
+                scene.add(cube);
+                cubes.push(cube);
+
+                const div = document.createElement('div');
+                div.className = 'label-3d';
+                div.innerText = titulos[i];
+                div.onclick = () => abrirVentana(i + 1);
+                labelsContainer.appendChild(div);
+                labels.push(div);
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+            window.addEventListener('mousedown', onClick3D);
+            animate();
+        }
+
+        function crearEstrellas() {
+            const geo = new THREE.BufferGeometry();
+            const verts = [];
+            for (let i = 0; i < 3000; i++) verts.push((Math.random()-0.5)*100, (Math.random()-0.5)*100, (Math.random()-0.5)*100);
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+            stars = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 }));
+            scene.add(stars);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(!modalAbierto) {
+                stars.rotation.y += 0.0005;
+                camera.position.x += (mouseX * 3 - camera.position.x) * 0.05;
+                camera.position.y += (mouseY * 3 - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+            }
+            cubes.forEach((cube, index) => {
+                cube.rotation.x += 0.005; cube.rotation.y += 0.01;
+                cube.position.y = Math.sin(Date.now() * 0.001 + index) * 0.3;
+                const vector = cube.position.clone().project(camera);
+                const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+                labels[index].style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                labels[index].style.opacity = (vector.z < 1 && !modalAbierto) ? 1 : 0;
+            });
+            renderer.render(scene, camera);
+        }
+
+        function onClick3D() {
+            if (modalAbierto) return;
+            const ray = new THREE.Raycaster();
+            ray.setFromCamera({ x: mouseX, y: mouseY }, camera);
+            const inter = ray.intersectObjects(cubes);
+            if (inter.length > 0) abrirVentana(inter[0].object.userData.id);
+        }
+
+        function abrirVentana(id) {
+            modalAbierto = true;
+            labels.forEach(l => l.style.display = 'none');
+            const v = document.getElementById(`ventana-${id}`);
+            v.classList.add('active');
+            gsap.fromTo(v, {scale: 0.8, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4});
+        }
+
+        function cerrarVentana() {
+            const active = document.querySelector('.overlay.active');
+            if(active) {
+                gsap.to(active, {opacity: 0, scale: 0.8, duration: 0.3, onComplete: () => {
+                    active.classList.remove('active');
+                    modalAbierto = false;
+                    labels.forEach(l => l.style.display = 'block');
+                }});
+            }
+        }
+
+        function generarPupiletra() {
+            const grid = document.getElementById('pupiletras-grid');
+            const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            for(let i=0; i<144; i++) {
+                const div = document.createElement('div');
+                div.className = 'letra';
+                div.innerText = letras[Math.floor(Math.random()*26)];
+                div.onclick = () => div.classList.toggle('active');
+                grid.appendChild(div);
+            }
+        }
+
+        function revisarPupiletra() {
+            const res = document.getElementById('pupi-res');
+            res.innerText = "Analizando...";
+            setTimeout(() => {
+                res.innerHTML = "¡Felicidades! Tienes nivel básico de niña jaja.<br>Esas son tus cualidades más fuertes, no las pierdas.";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
